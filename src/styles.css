@@ -8,6 +8,13 @@ html {
   scroll-behavior: smooth;
 }
 
+#product,
+#use-cases,
+#architecture-preview,
+#contact {
+  scroll-margin-top: 7rem;
+}
+
 body {
   margin: 0;
   min-width: 320px;
