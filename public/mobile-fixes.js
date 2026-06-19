@@ -127,7 +127,7 @@ function compactPipeline() {
       </section>
       <div class="mobile-pipeline-connector"><i></i></div>
       <section class="mobile-pipeline-core">
-        <span class="mobile-pipeline-core-label">Reason</span>
+        <span style="display:block;margin-top:0.25rem;color:rgb(207,250,254);font-size:0.75rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;">Reason</span>
         <b>Electroscope</b>
         <p>Agentic reasoning layer that keeps deal state alive.</p>
       </section>
