@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -7,10 +7,12 @@ import {
   Calendar,
   CircleDotDashed,
   Database,
+  Menu,
   MessageSquare,
   Radar,
   ShieldCheck,
   Workflow,
+  X,
 } from "lucide-react";
 
 const navItems = [
@@ -153,14 +155,16 @@ function SignalBackground({ reduceMotion }) {
 }
 
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#05070d]/74 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label="Electroscope home">
-          <span className="grid size-9 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
+          <span className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
             <Radar className="size-5 text-cyan-200" />
           </span>
-          <span className="text-base font-semibold tracking-wide text-white">Electroscope</span>
+          <span className="text-sm font-semibold tracking-wide text-white min-[390px]:text-base">Electroscope</span>
         </Link>
         <div className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
           {navItems.map((item) => (
@@ -169,14 +173,41 @@ function Navbar() {
             </Link>
           ))}
         </div>
-        <Link
-          to="/about#contact"
-          className="group inline-flex h-10 items-center gap-2 rounded-md border border-orange-300/35 bg-orange-300/10 px-4 text-sm font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16"
-        >
-          Book intro call
-          <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/about#contact"
+            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 sm:px-4 sm:text-sm"
+          >
+            Book intro call
+            <ArrowRight className="hidden size-4 transition group-hover:translate-x-0.5 sm:block" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center rounded-md border border-white/10 bg-white/[0.035] text-slate-100 transition hover:border-cyan-100/28 hover:text-cyan-100 md:hidden"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </nav>
+      {menuOpen ? (
+        <div className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+          <div className="mx-auto grid max-w-7xl gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.045] hover:text-cyan-100"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
@@ -203,18 +234,18 @@ export default function ArchitecturePage() {
       <SignalBackground reduceMotion={reduceMotion} />
       <Navbar />
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-20 pt-32 sm:px-8 lg:pt-36">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-20 pt-32 max-lg:pb-10 max-lg:pt-24 sm:px-8 lg:pt-36">
         <motion.div {...fadeUp()} className="max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Architecture</p>
-          <h1 className="mt-5 text-4xl font-semibold leading-tight text-white sm:text-6xl">Capture, reason, and act across the whole deal surface.</h1>
-          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
+          <h1 className="mt-5 text-4xl font-semibold leading-tight text-white max-lg:mt-4 max-lg:text-3xl sm:text-6xl md:max-lg:text-5xl">Capture, reason, and act across the whole deal surface.</h1>
+          <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300 max-lg:mt-4 max-lg:text-base max-lg:leading-7 sm:text-xl">
             Electroscope connects to the tools where enterprise sales work already happens, extracts the signals that matter, and turns them into living deal intelligence your team can act on.
           </p>
         </motion.div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="grid gap-5 lg:grid-cols-3">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-16 max-lg:py-10 sm:px-8">
+        <div className="grid gap-5 max-lg:gap-3 lg:grid-cols-3">
           {stages.map((stage, index) => {
             const Icon = stage.icon;
             return (
@@ -222,40 +253,40 @@ export default function ArchitecturePage() {
                 key={stage.title}
                 {...fadeUp(index * 0.08)}
                 whileHover={{ y: -4 }}
-                className="rounded-2xl border border-white/10 bg-[#09111f]/82 p-7 shadow-[0_0_52px_rgba(34,211,238,0.07)] transition hover:border-cyan-100/28 hover:shadow-[0_0_64px_rgba(34,211,238,0.14)]"
+                className="rounded-2xl border border-white/10 bg-[#09111f]/82 p-7 shadow-[0_0_52px_rgba(34,211,238,0.07)] transition hover:border-cyan-100/28 hover:shadow-[0_0_64px_rgba(34,211,238,0.14)] max-lg:p-4"
               >
                 <div className="flex items-center justify-between">
-                  <Icon className="size-8 text-orange-100" />
+                  <Icon className="size-8 text-orange-100 max-lg:size-6" />
                   <span className="text-sm text-slate-500">0{index + 1}</span>
                 </div>
-                <h2 className="mt-8 text-2xl font-semibold text-white">{stage.title}</h2>
-                <p className="mt-4 leading-7 text-slate-300">{stage.text}</p>
-                <p className="mt-5 rounded-xl border border-cyan-200/14 bg-cyan-200/[0.04] p-4 text-sm leading-6 text-slate-300">{stage.detail}</p>
+                <h2 className="mt-8 text-2xl font-semibold text-white max-lg:mt-4 max-lg:text-xl">{stage.title}</h2>
+                <p className="mt-4 leading-7 text-slate-300 max-lg:mt-2 max-lg:text-sm max-lg:leading-6">{stage.text}</p>
+                <p className="mt-5 rounded-xl border border-cyan-200/14 bg-cyan-200/[0.04] p-4 text-sm leading-6 text-slate-300 max-lg:mt-3 max-lg:p-3">{stage.detail}</p>
               </motion.article>
             );
           })}
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8">
-        <motion.div {...fadeUp()} className="mb-10 max-w-4xl">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 max-lg:py-12 sm:px-8">
+        <motion.div {...fadeUp()} className="mb-10 max-w-4xl max-lg:mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-200">Integrations</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">Connect the systems your revenue team already uses.</h2>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+          <h2 className="mt-4 text-3xl font-semibold text-white max-lg:text-2xl sm:text-5xl md:max-lg:text-4xl">Connect the systems your revenue team already uses.</h2>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300 max-lg:mt-4 max-lg:text-base max-lg:leading-7">
             Electroscope uses native APIs and MCP-style connectors to access sales activity across your work ecosystem, then enriches deal context without forcing reps into another system.
           </p>
         </motion.div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 max-lg:gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {integrationGroups.map((group, index) => {
             const Icon = group.icon;
             return (
-              <motion.article key={group.title} {...fadeUp(index * 0.06)} className="rounded-2xl border border-white/10 bg-[#08101d]/86 p-5 shadow-[0_0_48px_rgba(255,142,62,0.05)] transition hover:border-cyan-100/24 hover:bg-white/[0.045]">
-                <Icon className="size-7 text-cyan-100" />
-                <h3 className="mt-4 text-xl font-semibold text-white">{group.title}</h3>
-                <div className="mt-5 grid gap-3">
+              <motion.article key={group.title} {...fadeUp(index * 0.06)} className="rounded-2xl border border-white/10 bg-[#08101d]/86 p-5 shadow-[0_0_48px_rgba(255,142,62,0.05)] transition hover:border-cyan-100/24 hover:bg-white/[0.045] max-lg:p-4">
+                <Icon className="size-7 text-cyan-100 max-lg:size-6" />
+                <h3 className="mt-4 text-xl font-semibold text-white max-lg:mt-3 max-lg:text-lg">{group.title}</h3>
+                <div className="mt-5 grid gap-3 max-lg:mt-3 max-lg:gap-2">
                   {group.items.map(([name, status]) => (
-                    <div key={name} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2">
-                      <span className="font-medium text-slate-100">{name}</span>
+                    <div key={name} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2 max-lg:gap-2 max-lg:px-2.5 max-lg:py-2">
+                      <span className="text-sm font-medium text-slate-100">{name}</span>
                       {status ? <span className="rounded-full border border-orange-200/20 bg-orange-200/[0.08] px-2 py-0.5 text-xs text-orange-100">{status}</span> : null}
                     </div>
                   ))}
@@ -266,18 +297,18 @@ export default function ArchitecturePage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8">
-        <motion.div {...fadeUp()} className="mb-10 max-w-4xl">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 max-lg:py-12 sm:px-8">
+        <motion.div {...fadeUp()} className="mb-10 max-w-4xl max-lg:mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">System diagram</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">From scattered systems to role-specific answers.</h2>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+          <h2 className="mt-4 text-3xl font-semibold text-white max-lg:text-2xl sm:text-5xl md:max-lg:text-4xl">From scattered systems to role-specific answers.</h2>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300 max-lg:mt-4 max-lg:text-base max-lg:leading-7">
             Electroscope captures signals from systems, documents, communication, and email, then reasons over the account graph so each team member gets the context they need.
           </p>
         </motion.div>
 
         <motion.div
           {...fadeUp(0.08)}
-          className="relative overflow-hidden rounded-3xl border border-cyan-100/16 bg-[#06101d]/72 p-4 shadow-[0_0_90px_rgba(34,211,238,0.12)] sm:p-6"
+          className="relative hidden overflow-hidden rounded-3xl border border-cyan-100/16 bg-[#06101d]/72 p-4 shadow-[0_0_90px_rgba(34,211,238,0.12)] sm:p-6 lg:block"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_86%_30%,rgba(255,142,62,0.1),transparent_28%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-50" />
@@ -300,22 +331,24 @@ export default function ArchitecturePage() {
             <RoleAnswers />
           </div>
         </motion.div>
+
+        <MobileSystemDiagram reduceMotion={reduceMotion} />
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <motion.div {...fadeUp()} className="rounded-2xl border border-white/10 bg-white/[0.035] p-7">
-          <ShieldCheck className="size-8 text-cyan-100" />
-          <h2 className="mt-5 text-2xl font-semibold text-white">Built for existing sales workflows.</h2>
-          <p className="mt-4 max-w-4xl leading-7 text-slate-300">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-16 max-lg:py-10 sm:px-8">
+        <motion.div {...fadeUp()} className="rounded-2xl border border-white/10 bg-white/[0.035] p-7 max-lg:p-5">
+          <ShieldCheck className="size-8 text-cyan-100 max-lg:size-7" />
+          <h2 className="mt-5 text-2xl font-semibold text-white max-lg:mt-4 max-lg:text-xl">Built for existing sales workflows.</h2>
+          <p className="mt-4 max-w-4xl leading-7 text-slate-300 max-lg:text-sm max-lg:leading-6">
             Electroscope is designed to enrich the systems teams already trust, not replace them. Signals are organized, weighted, and surfaced back into the workflows where sellers, leaders, and operators make decisions.
           </p>
         </motion.div>
       </section>
 
-      <section className="relative z-10 px-5 py-24 sm:px-8">
-        <motion.div {...fadeUp()} className="mx-auto max-w-5xl rounded-3xl border border-cyan-200/18 bg-[linear-gradient(135deg,rgba(34,211,238,0.11),rgba(255,142,62,0.08)_45%,rgba(255,255,255,0.035))] p-8 text-center shadow-[0_0_80px_rgba(34,211,238,0.12)] sm:p-14">
-          <h2 className="text-3xl font-semibold text-white sm:text-5xl">See how Electroscope fits your revenue stack.</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+      <section className="relative z-10 px-5 py-24 max-lg:py-12 sm:px-8">
+        <motion.div {...fadeUp()} className="mx-auto max-w-5xl rounded-3xl border border-cyan-200/18 bg-[linear-gradient(135deg,rgba(34,211,238,0.11),rgba(255,142,62,0.08)_45%,rgba(255,255,255,0.035))] p-8 text-center shadow-[0_0_80px_rgba(34,211,238,0.12)] max-lg:p-6 sm:p-14">
+          <h2 className="text-3xl font-semibold text-white max-lg:text-2xl sm:text-5xl">See how Electroscope fits your revenue stack.</h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300 max-lg:mt-4 max-lg:text-base max-lg:leading-7">
             Book an intro call to explore how Electroscope can connect to your sales tools and surface deal intelligence without manual CRM work.
           </p>
           <Link to="/about#contact" className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-md bg-orange-200 px-5 text-sm font-semibold text-[#160b05] shadow-[0_0_34px_rgba(255,142,62,0.22)] transition hover:bg-orange-100">
@@ -327,6 +360,153 @@ export default function ArchitecturePage() {
 
       <Footer />
     </main>
+  );
+}
+
+function MobileSystemDiagram({ reduceMotion }) {
+  return (
+    <motion.div
+      {...fadeUp(0.08)}
+      className="relative overflow-hidden rounded-2xl border border-cyan-100/16 bg-[#06101d]/72 p-4 shadow-[0_0_58px_rgba(34,211,238,0.1)] lg:hidden"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(34,211,238,0.14),transparent_32%),radial-gradient(circle_at_72%_80%,rgba(255,142,62,0.1),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:36px_36px] opacity-45" />
+
+      <div className="relative grid gap-4">
+        <section className="rounded-2xl border border-white/10 bg-[#07101d]/86 p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-white">Data sources</h3>
+            <span className="rounded-full border border-emerald-200/20 bg-emerald-200/[0.08] px-2.5 py-1 text-[11px] font-semibold text-emerald-100">Live</span>
+          </div>
+          <div className="grid gap-2 min-[430px]:grid-cols-2">
+            {dataSources.map((source, index) => (
+              <motion.article
+                key={source.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.42, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                className="rounded-xl border border-white/10 bg-white/[0.04] p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-cyan-50">{source.title}</p>
+                  <span className="size-2 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.9)]" />
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-400">{source.text}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {source.badges.map((badge) => (
+                    <span key={badge.name} className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px] font-semibold ${badge.classes}`}>
+                      <span className="grid size-4 place-items-center rounded-full bg-white/10 text-[9px]">{badge.mark}</span>
+                      {badge.name}
+                    </span>
+                  ))}
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <MobileDiagramConnector label="Signals normalized" reduceMotion={reduceMotion} />
+
+        <section className="relative rounded-2xl border border-cyan-100/24 bg-cyan-200/[0.06] p-4 text-center shadow-[0_0_58px_rgba(34,211,238,0.14)]">
+          <div className="absolute inset-x-8 -top-px h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_18px_rgba(34,211,238,0.7)]" />
+          <motion.span
+            className="mx-auto grid size-12 place-items-center rounded-full border border-cyan-200/35 bg-cyan-200/[0.1] text-sm font-semibold text-cyan-50 shadow-[0_0_32px_rgba(34,211,238,0.28)]"
+            animate={reduceMotion ? undefined : { boxShadow: ["0 0 18px rgba(34,211,238,0.18)", "0 0 40px rgba(255,142,62,0.22)", "0 0 18px rgba(34,211,238,0.18)"] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            ES
+          </motion.span>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">Reasoning core</p>
+          <h3 className="mt-1 text-xl font-semibold text-white">Electroscope</h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-300">Extracts entities, stacks context, maps relationships, and reasons over risk.</p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {coreLayers.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.38, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                className="flex min-h-12 items-center gap-2 rounded-xl border border-white/10 bg-[#07101d]/78 px-2.5 py-2 text-left"
+              >
+                <span className={`size-2 rounded-full ${item.color} shadow-[0_0_12px_currentColor]`} />
+                <span className="text-xs font-semibold leading-4 text-slate-100">{item.title}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        <MobileDiagramConnector label="Answers generated" tone="orange" reduceMotion={reduceMotion} />
+
+        <section className="rounded-2xl border border-white/10 bg-[#07101d]/86 p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-white">Role-specific answers</h3>
+            <span className="rounded-full border border-orange-200/22 bg-orange-200/[0.08] px-2.5 py-1 text-[11px] font-semibold text-orange-100">Action ready</span>
+          </div>
+          <div className="grid gap-2">
+            {answers.map((answer, index) => (
+              <motion.article
+                key={answer.role}
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.42, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                className="rounded-xl border border-white/10 bg-white/[0.04] p-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{answer.role}</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-300">“{answer.prompt}”</p>
+                  </div>
+                  <span
+                    className={
+                      answer.tone === "orange"
+                        ? "shrink-0 rounded-full border border-orange-200/24 bg-orange-200/[0.07] px-2 py-1 text-[11px] font-semibold text-orange-100"
+                        : answer.tone === "green"
+                          ? "shrink-0 rounded-full border border-emerald-200/22 bg-emerald-200/[0.055] px-2 py-1 text-[11px] font-semibold text-emerald-100"
+                          : "shrink-0 rounded-full border border-cyan-200/22 bg-cyan-200/[0.055] px-2 py-1 text-[11px] font-semibold text-cyan-100"
+                    }
+                  >
+                    {answer.label}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-400">{answer.detail}</p>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </motion.div>
+  );
+}
+
+function MobileDiagramConnector({ label, tone = "cyan", reduceMotion }) {
+  const lineClass =
+    tone === "orange"
+      ? "bg-gradient-to-b from-orange-200/20 via-orange-200/80 to-cyan-200/20 shadow-[0_0_16px_rgba(255,142,62,0.55)]"
+      : "bg-gradient-to-b from-cyan-200/20 via-cyan-200/80 to-cyan-200/20 shadow-[0_0_16px_rgba(34,211,238,0.6)]";
+  const dotClass = tone === "orange" ? "bg-orange-200 shadow-[0_0_14px_rgba(255,142,62,0.9)]" : "bg-cyan-200 shadow-[0_0_14px_rgba(34,211,238,0.9)]";
+
+  return (
+    <div className="relative grid place-items-center py-0.5">
+      <motion.div
+        className={`relative h-10 w-px ${lineClass}`}
+        initial={reduceMotion ? false : { scaleY: 0, opacity: 0 }}
+        whileInView={reduceMotion ? undefined : { scaleY: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {!reduceMotion ? (
+          <motion.span
+            className={`absolute -left-1 top-0 size-2 rounded-full ${dotClass}`}
+            animate={{ y: [0, 32], opacity: [0, 1, 0] }}
+            transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ) : null}
+      </motion.div>
+      <span className="mt-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">{label}</span>
+    </div>
   );
 }
 
