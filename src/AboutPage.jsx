@@ -204,7 +204,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section id="contact" className="relative z-10 px-5 py-24 sm:px-8">
+      <section id="contact" className="relative z-10 scroll-mt-28 px-5 py-24 sm:px-8">
         <motion.div
           {...fadeUp()}
           className="mx-auto grid max-w-7xl gap-8 rounded-3xl border border-cyan-100/18 bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(255,142,62,0.08)_44%,rgba(255,255,255,0.035))] p-6 shadow-[0_0_90px_rgba(34,211,238,0.13)] sm:p-8 lg:grid-cols-[0.82fr_1fr]"
