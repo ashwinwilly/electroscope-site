@@ -250,11 +250,46 @@ const orangePath = ["Problem", "Discovery", "Outcome", "Solution", "Buyer", "Dec
 
 function fadeUp(delay = 0) {
   return {
-    initial: { opacity: 0, y: 28 },
-    whileInView: { opacity: 1, y: 0 },
+    initial: { opacity: 0, y: 24, filter: "blur(10px)" },
+    whileInView: { opacity: 1, y: 0, filter: "blur(0px)" },
     viewport: { once: true, margin: "-80px" },
     transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] },
   };
+}
+
+function useScrolled() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 18);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  return scrolled;
+}
+
+function CursorGlow({ reduceMotion }) {
+  const [position, setPosition] = useState({ x: -200, y: -200 });
+
+  useEffect(() => {
+    if (reduceMotion || window.matchMedia("(pointer: coarse)").matches) return undefined;
+    const update = (event) => setPosition({ x: event.clientX, y: event.clientY });
+    window.addEventListener("pointermove", update, { passive: true });
+    return () => window.removeEventListener("pointermove", update);
+  }, [reduceMotion]);
+
+  if (reduceMotion) return null;
+
+  return (
+    <motion.div
+      className="cursor-glow"
+      animate={{ x: position.x - 220, y: position.y - 220 }}
+      transition={{ type: "spring", stiffness: 55, damping: 24, mass: 0.4 }}
+      aria-hidden="true"
+    />
+  );
 }
 
 function HashScroll() {
@@ -303,6 +338,7 @@ function HomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       <SignalBackground reduceMotion={reduceMotion} />
+      <CursorGlow reduceMotion={reduceMotion} />
       <Navbar />
       <Hero reduceMotion={reduceMotion} />
       <EnterpriseStrip />
@@ -322,9 +358,23 @@ function HomePage() {
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrolled = useScrolled();
+  const location = useLocation();
+
+  const isActive = (item) => {
+    if (item.href === "/") return location.pathname === "/" && !location.hash;
+    if (item.href.startsWith("/#")) return location.pathname === "/" && location.hash === item.href.slice(1);
+    return location.pathname === item.href.split("#")[0];
+  };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#05070d]/74 backdrop-blur-xl">
+    <motion.header
+      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-xl transition duration-300 ${
+        scrolled
+          ? "border-cyan-100/14 bg-[#05070d]/86 shadow-[0_14px_52px_rgba(0,0,0,0.34),0_0_34px_rgba(34,211,238,0.07)]"
+          : "border-white/8 bg-[#05070d]/74"
+      }`}
+    >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label="Electroscope home">
           <span className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
@@ -334,15 +384,21 @@ function Navbar() {
         </Link>
         <div className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
           {navItems.map((item) => (
-            <Link key={item.label} to={item.href} className="transition hover:text-cyan-100">
+            <Link key={item.label} to={item.href} className={`relative transition hover:text-cyan-100 ${isActive(item) ? "text-cyan-100" : ""}`}>
               {item.label}
+              {isActive(item) ? (
+                <motion.span
+                  layoutId="home-nav-active"
+                  className="absolute -bottom-2 left-1/2 h-px w-5 -translate-x-1/2 bg-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+                />
+              ) : null}
             </Link>
           ))}
         </div>
         <div className="flex items-center gap-2">
           <Link
             to="/about#contact"
-            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 sm:px-4 sm:text-sm"
+            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 hover:shadow-[0_0_34px_rgba(255,144,69,0.22)] sm:px-4 sm:text-sm"
           >
             Book intro call
             <ArrowRight className="hidden size-4 transition group-hover:translate-x-0.5 sm:block" />
@@ -358,8 +414,15 @@ function Navbar() {
           </button>
         </div>
       </nav>
-      {menuOpen ? (
-        <div className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+      <AnimatePresence>
+        {menuOpen ? (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden"
+        >
           <div className="mx-auto grid max-w-7xl gap-1">
             {navItems.map((item) => (
               <Link
@@ -372,14 +435,15 @@ function Navbar() {
               </Link>
             ))}
           </div>
-        </div>
-      ) : null}
-    </header>
+        </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </motion.header>
   );
 }
 
 function SignalBackground({ reduceMotion }) {
-  const dots = Array.from({ length: 24 }, (_, index) => ({
+  const dots = Array.from({ length: 18 }, (_, index) => ({
     id: index,
     left: `${(index * 23) % 100}%`,
     top: `${(index * 37) % 100}%`,
@@ -395,8 +459,8 @@ function SignalBackground({ reduceMotion }) {
           key={dot.id}
           className="absolute size-1 rounded-full bg-cyan-200/60 shadow-[0_0_14px_rgba(92,225,255,0.9)]"
           style={{ left: dot.left, top: dot.top }}
-          animate={reduceMotion ? undefined : { opacity: [0.15, 0.8, 0.2], scale: [0.8, 1.6, 0.9] }}
-          transition={{ duration: 4.6, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion ? undefined : { opacity: [0.1, 0.46, 0.16], scale: [0.8, 1.35, 0.9] }}
+          transition={{ duration: 5.4, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -530,8 +594,10 @@ function SignalRow({ label, highlight, tone, value, index = 0, reduceMotion = fa
 }
 
 function EnterpriseStrip() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className="relative z-10 border-y border-white/8 bg-[#07101a]/54 px-5 py-10 sm:px-8">
+    <section className="section-glow-separator relative z-10 border-y border-white/8 bg-[#07101a]/54 px-5 py-10 sm:px-8">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.46fr_1fr] lg:items-center">
         <motion.div {...fadeUp()} className="max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Built for enterprise revenue teams</p>
@@ -541,14 +607,14 @@ function EnterpriseStrip() {
           {integrationBadges.map(([name, mark], index) => (
             <motion.div
               key={name}
-              whileHover={{ y: -2 }}
+              whileHover={reduceMotion ? undefined : { y: -2 }}
               transition={{ duration: 0.2 }}
-              className="group flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/24 hover:bg-white/[0.055]"
+              className="integration-shimmer group flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/28 hover:bg-white/[0.055] hover:shadow-[0_0_32px_rgba(34,211,238,0.1)]"
             >
-              <span className="grid size-8 shrink-0 place-items-center rounded-md border border-cyan-200/16 bg-cyan-200/[0.06] text-[0.66rem] font-bold text-cyan-100 group-hover:border-cyan-100/30">
+              <span className="grid size-8 shrink-0 place-items-center rounded-md border border-cyan-200/16 bg-cyan-200/[0.06] text-[0.66rem] font-bold text-cyan-100 transition group-hover:border-cyan-100/36 group-hover:text-white">
                 {mark}
               </span>
-              <span className="text-sm font-medium text-slate-200">{name}</span>
+              <span className="text-sm font-medium text-slate-200 transition group-hover:text-white">{name}</span>
             </motion.div>
           ))}
         </motion.div>
@@ -559,7 +625,7 @@ function EnterpriseStrip() {
 
 function HowItWorks({ reduceMotion }) {
   return (
-    <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8">
+    <section className="section-glow-separator relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8">
       <motion.div {...fadeUp()} className="mb-10 max-w-4xl">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">How it works</p>
         <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">From scattered context to source-backed deal intelligence.</h2>
@@ -572,6 +638,13 @@ function HowItWorks({ reduceMotion }) {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         />
+        {!reduceMotion ? (
+          <motion.span
+            className="pointer-events-none absolute left-[16%] top-14 hidden size-1.5 rounded-full bg-cyan-100 shadow-[0_0_14px_rgba(34,211,238,1)] lg:block"
+            animate={{ x: ["0vw", "53vw"], opacity: [0, 1, 0] }}
+            transition={{ duration: 3.8, delay: 1.05, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ) : null}
         {howItWorks.map((step, index) => {
           const Icon = step.icon;
           return (
@@ -668,7 +741,21 @@ function DealSignalGraph({ reduceMotion }) {
               {orangePath.slice(0, -1).map((label) => {
                 const from = nodeByLabel[label];
                 const to = nodeByLabel[orangePath[orangePath.indexOf(label) + 1]];
-                return <line key={`${label}-${to.label}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} className="signal-line-orange" filter="url(#orange-glow)" />;
+                return (
+                  <motion.line
+                    key={`${label}-${to.label}`}
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
+                    className="signal-line-orange"
+                    filter="url(#orange-glow)"
+                    initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.9, delay: 0.15 + orangePath.indexOf(label) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                );
               })}
             </g>
             {cyanConnections.map(([fromLabel, toLabel], index) => {
@@ -682,11 +769,35 @@ function DealSignalGraph({ reduceMotion }) {
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ duration: 0.7, delay: 1.25 + index * 0.13, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} className="signal-line-cyan" filter="url(#cyan-glow)" />
+                  <motion.line
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
+                    className="signal-line-cyan"
+                    filter="url(#cyan-glow)"
+                    initial={reduceMotion ? false : { pathLength: 0 }}
+                    whileInView={{ pathLength: 1 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.75, delay: 1.25 + index * 0.13, ease: [0.22, 1, 0.36, 1] }}
+                  />
                 </motion.g>
               );
             })}
           </svg>
+          {!reduceMotion ? (
+            <>
+              {[0, 1, 2].map((item) => (
+                <motion.span
+                  key={item}
+                  className="pointer-events-none absolute size-1.5 rounded-full bg-cyan-100 shadow-[0_0_18px_rgba(34,211,238,1)]"
+                  style={{ left: `${22 + item * 22}%`, top: `${42 + (item % 2) * 9}%` }}
+                  animate={{ opacity: [0, 1, 0], scale: [0.75, 1.25, 0.75] }}
+                  transition={{ duration: 2.8, delay: 1.5 + item * 0.48, repeat: Infinity, ease: "easeInOut" }}
+                />
+              ))}
+            </>
+          ) : null}
 
           {graphNodes.map((node, index) => (
             <SignalNode key={node.label} node={node} index={index} reduceMotion={reduceMotion} />
@@ -1067,12 +1178,12 @@ function ProductDemo({ reduceMotion }) {
                 </div>
                 <span className="rounded-full border border-cyan-200/20 bg-cyan-200/[0.08] px-3 py-1 text-xs font-medium text-cyan-100">Live context</span>
               </div>
-              <div className="relative mb-4 flex flex-wrap gap-2">
-                <MetaPill label="Source" value="Feb 19 technical deep-dive" />
-                <MetaPill label="Updated" value="12 min ago" tone="cyan" />
-                <MetaPill label="Confidence" value="Medium" tone="blue" />
-                <MetaPill label="Forecast impact" value="+18% risk" tone="orange" />
-                <MetaPill label="CRM" value="Linked to opportunity" tone="green" />
+              <div key={activeTab.title} className="relative mb-4 flex flex-wrap gap-2">
+                <MetaPill label="Source" value="Feb 19 technical deep-dive" index={0} reduceMotion={reduceMotion} />
+                <MetaPill label="Updated" value="12 min ago" tone="cyan" index={1} reduceMotion={reduceMotion} />
+                <MetaPill label="Confidence" value="Medium" tone="blue" index={2} reduceMotion={reduceMotion} />
+                <MetaPill label="Forecast impact" value="+18% risk" tone="orange" index={3} reduceMotion={reduceMotion} />
+                <MetaPill label="CRM" value="Linked to opportunity" tone="green" index={4} reduceMotion={reduceMotion} />
               </div>
 
               <AnimatePresence mode="wait">
@@ -1121,7 +1232,7 @@ function ProductDemo({ reduceMotion }) {
   );
 }
 
-function MetaPill({ label, value, tone = "slate" }) {
+function MetaPill({ label, value, tone = "slate", index = 0, reduceMotion = false }) {
   const palette = {
     slate: "border-white/10 bg-white/[0.035] text-slate-300",
     cyan: "border-cyan-200/18 bg-cyan-200/[0.055] text-cyan-100",
@@ -1131,10 +1242,15 @@ function MetaPill({ label, value, tone = "slate" }) {
   };
 
   return (
-    <span className={`rounded-full border px-2.5 py-1 text-[0.7rem] font-medium ${palette[tone]}`}>
+    <motion.span
+      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, delay: 0.05 + index * 0.045, ease: [0.22, 1, 0.36, 1] }}
+      className={`rounded-full border px-2.5 py-1 text-[0.7rem] font-medium ${palette[tone]}`}
+    >
       <span className="text-slate-500">{label}: </span>
       {value}
-    </span>
+    </motion.span>
   );
 }
 
@@ -1167,14 +1283,14 @@ function PanelBlock({ title, children, accent = "cyan", className = "" }) {
     blue: "border-blue-300/16 bg-blue-300/[0.05]",
   };
   return (
-    <div className={`rounded-xl border p-4 ${palette[accent]} ${className}`}>
+    <div className={`rounded-xl border p-4 ${palette[accent]} ${accent === "red" ? "risk-pulse-once" : ""} ${className}`}>
       <h4 className="text-sm font-semibold text-white">{title}</h4>
       <div className="mt-3 text-sm leading-6 text-slate-300">{children}</div>
     </div>
   );
 }
 
-function StatusCard({ label, status, color, width }) {
+function StatusCard({ label, status, color, width, index = 0, reduceMotion = false }) {
   const colorMap = {
     green: "bg-emerald-300 text-emerald-100 border-emerald-300/20",
     red: "bg-red-300 text-red-100 border-red-300/20",
@@ -1184,10 +1300,22 @@ function StatusCard({ label, status, color, width }) {
     <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{label}</span>
-        <span className={`rounded-full border px-2 py-0.5 text-[0.68rem] font-semibold ${colorMap[color]}`}>{status}</span>
+        <motion.span
+          className={`rounded-full border px-2 py-0.5 text-[0.68rem] font-semibold ${colorMap[color]}`}
+          animate={reduceMotion || color !== "red" ? undefined : { boxShadow: ["0 0 0 rgba(248,113,113,0)", "0 0 18px rgba(248,113,113,0.34)", "0 0 0 rgba(248,113,113,0)"] }}
+          transition={{ duration: 1.3, delay: 0.5, repeat: 0 }}
+        >
+          {status}
+        </motion.span>
       </div>
       <div className="mt-3 h-1.5 rounded-full bg-white/8">
-        <div className={`h-full rounded-full ${colorMap[color].split(" ")[0]}`} style={{ width }} />
+        <motion.div
+          className={`h-full origin-left rounded-full ${colorMap[color].split(" ")[0]}`}
+          initial={reduceMotion ? false : { scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.55, delay: 0.15 + index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+          style={{ width }}
+        />
       </div>
     </div>
   );
@@ -1198,16 +1326,21 @@ function LivingNarrativePanel({ reduceMotion }) {
   return (
     <div className="grid gap-4">
       <div className="grid gap-3 md:grid-cols-3">
-        <RevealItem index={0} reduceMotion={reduceMotion}><StatusCard label="Objectives" status="On track" color="green" width="78%" /></RevealItem>
-        <RevealItem index={1} reduceMotion={reduceMotion}><StatusCard label="Budget" status="At risk" color="red" width="44%" /></RevealItem>
-        <RevealItem index={2} reduceMotion={reduceMotion}><StatusCard label="Timeline" status="Medium" color="orange" width="61%" /></RevealItem>
+        <RevealItem index={0} reduceMotion={reduceMotion}><StatusCard label="Objectives" status="On track" color="green" width="78%" index={0} reduceMotion={reduceMotion} /></RevealItem>
+        <RevealItem index={1} reduceMotion={reduceMotion}><StatusCard label="Budget" status="At risk" color="red" width="44%" index={1} reduceMotion={reduceMotion} /></RevealItem>
+        <RevealItem index={2} reduceMotion={reduceMotion}><StatusCard label="Timeline" status="Medium" color="orange" width="61%" index={2} reduceMotion={reduceMotion} /></RevealItem>
       </div>
       <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
         <PanelBlock title="Deal timeline">
           <div className="grid gap-2">
             {timeline.map((item, index) => (
               <RevealItem key={item} index={index + 2} reduceMotion={reduceMotion} className="relative border-l border-cyan-200/24 pl-4">
-                <span className="absolute -left-[5px] top-1.5 size-2.5 rounded-full bg-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
+                <motion.span
+                  className="absolute -left-[5px] top-1.5 size-2.5 rounded-full bg-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.9)]"
+                  initial={reduceMotion ? false : { scale: 0.65, opacity: 0.35 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.2 + index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                />
                 <div className="flex items-center justify-between gap-3">
                   <span>{item}</span>
                   <span className="text-xs text-slate-500">0{index + 1}</span>
@@ -1254,11 +1387,23 @@ function MeetingPrepPanel({ reduceMotion }) {
         <RevealItem index={1} reduceMotion={reduceMotion}>
           <PanelBlock title="Goals checklist" accent="green">
             <div className="space-y-2">
-              {goals.map((goal) => (
-                <div key={goal} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-200" />
+              {goals.map((goal, index) => (
+                <motion.div
+                  key={goal}
+                  initial={reduceMotion ? false : { opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 + index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex items-start gap-2"
+                >
+                  <motion.span
+                    initial={reduceMotion ? false : { scale: 0.7 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.22, delay: 0.26 + index * 0.08 }}
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-200" />
+                  </motion.span>
                   <span>{goal}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </PanelBlock>
@@ -1390,6 +1535,8 @@ function UseCases() {
 }
 
 function Architecture() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section id="architecture-preview" className="relative z-10 mx-auto max-w-7xl scroll-mt-28 px-5 py-20 sm:px-8">
       <motion.div {...fadeUp()} className="mb-12 max-w-3xl">
@@ -1399,9 +1546,18 @@ function Architecture() {
       <div className="relative grid gap-5 lg:grid-cols-3">
         <motion.div
           className="pointer-events-none absolute left-[16%] right-[16%] top-1/2 hidden h-px bg-gradient-to-r from-cyan-200/10 via-cyan-200/70 to-orange-200/20 shadow-[0_0_18px_rgba(34,211,238,0.45)] lg:block"
-          animate={{ opacity: [0.3, 0.9, 0.35] }}
-          transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+          initial={reduceMotion ? false : { scaleX: 0, opacity: 0 }}
+          whileInView={{ scaleX: 1, opacity: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         />
+        {!reduceMotion ? (
+          <motion.span
+            className="pointer-events-none absolute left-[17%] top-1/2 hidden size-1.5 -translate-y-1/2 rounded-full bg-cyan-100 shadow-[0_0_14px_rgba(34,211,238,1)] lg:block"
+            animate={{ x: ["0vw", "52vw"], opacity: [0, 1, 0] }}
+            transition={{ duration: 3.6, delay: 0.9, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ) : null}
         {architecture.map((item, index) => {
           const Icon = item.icon;
           return (

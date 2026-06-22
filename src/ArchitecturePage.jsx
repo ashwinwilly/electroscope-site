@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Blocks,
@@ -122,15 +122,50 @@ const answers = [
 
 function fadeUp(delay = 0) {
   return {
-    initial: { opacity: 0, y: 28 },
-    whileInView: { opacity: 1, y: 0 },
+    initial: { opacity: 0, y: 24, filter: "blur(10px)" },
+    whileInView: { opacity: 1, y: 0, filter: "blur(0px)" },
     viewport: { once: true, margin: "-80px" },
     transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] },
   };
 }
 
+function useScrolled() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 18);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  return scrolled;
+}
+
+function CursorGlow({ reduceMotion }) {
+  const [position, setPosition] = useState({ x: -200, y: -200 });
+
+  useEffect(() => {
+    if (reduceMotion || window.matchMedia("(pointer: coarse)").matches) return undefined;
+    const update = (event) => setPosition({ x: event.clientX, y: event.clientY });
+    window.addEventListener("pointermove", update, { passive: true });
+    return () => window.removeEventListener("pointermove", update);
+  }, [reduceMotion]);
+
+  if (reduceMotion) return null;
+
+  return (
+    <motion.div
+      className="cursor-glow"
+      animate={{ x: position.x - 220, y: position.y - 220 }}
+      transition={{ type: "spring", stiffness: 55, damping: 24, mass: 0.4 }}
+      aria-hidden="true"
+    />
+  );
+}
+
 function SignalBackground({ reduceMotion }) {
-  const dots = Array.from({ length: 30 }, (_, index) => ({
+  const dots = Array.from({ length: 20 }, (_, index) => ({
     id: index,
     left: `${(index * 31) % 100}%`,
     top: `${(index * 43) % 100}%`,
@@ -146,8 +181,8 @@ function SignalBackground({ reduceMotion }) {
           key={dot.id}
           className="absolute size-1 rounded-full bg-cyan-200/60 shadow-[0_0_14px_rgba(92,225,255,0.9)]"
           style={{ left: dot.left, top: dot.top }}
-          animate={reduceMotion ? undefined : { opacity: [0.16, 0.75, 0.22], scale: [0.8, 1.5, 0.9] }}
-          transition={{ duration: 4.8, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion ? undefined : { opacity: [0.12, 0.5, 0.18], scale: [0.8, 1.35, 0.9] }}
+          transition={{ duration: 5.2, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -156,9 +191,23 @@ function SignalBackground({ reduceMotion }) {
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrolled = useScrolled();
+  const location = useLocation();
+
+  const isActive = (item) => {
+    if (item.href === "/") return location.pathname === "/" && !location.hash;
+    if (item.href.startsWith("/#")) return location.pathname === "/" && location.hash === item.href.slice(1);
+    return location.pathname === item.href.split("#")[0];
+  };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#05070d]/74 backdrop-blur-xl">
+    <motion.header
+      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-xl transition duration-300 ${
+        scrolled
+          ? "border-cyan-100/14 bg-[#05070d]/86 shadow-[0_14px_52px_rgba(0,0,0,0.34),0_0_34px_rgba(34,211,238,0.07)]"
+          : "border-white/8 bg-[#05070d]/74"
+      }`}
+    >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label="Electroscope home">
           <span className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
@@ -168,15 +217,16 @@ function Navbar() {
         </Link>
         <div className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
           {navItems.map((item) => (
-            <Link key={item.label} to={item.href} className="transition hover:text-cyan-100">
+            <Link key={item.label} to={item.href} className={`relative transition hover:text-cyan-100 ${isActive(item) ? "text-cyan-100" : ""}`}>
               {item.label}
+              {isActive(item) ? <motion.span layoutId="architecture-nav-active" className="absolute -bottom-2 left-1/2 h-px w-5 -translate-x-1/2 bg-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.9)]" /> : null}
             </Link>
           ))}
         </div>
         <div className="flex items-center gap-2">
           <Link
             to="/about#contact"
-            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 sm:px-4 sm:text-sm"
+            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 hover:shadow-[0_0_34px_rgba(255,144,69,0.22)] sm:px-4 sm:text-sm"
           >
             Book intro call
             <ArrowRight className="hidden size-4 transition group-hover:translate-x-0.5 sm:block" />
@@ -192,8 +242,15 @@ function Navbar() {
           </button>
         </div>
       </nav>
-      {menuOpen ? (
-        <div className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+      <AnimatePresence>
+        {menuOpen ? (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden"
+        >
           <div className="mx-auto grid max-w-7xl gap-1">
             {navItems.map((item) => (
               <Link
@@ -206,9 +263,10 @@ function Navbar() {
               </Link>
             ))}
           </div>
-        </div>
-      ) : null}
-    </header>
+        </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </motion.header>
   );
 }
 
@@ -232,6 +290,7 @@ export default function ArchitecturePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#05070d] text-slate-100">
       <SignalBackground reduceMotion={reduceMotion} />
+      <CursorGlow reduceMotion={reduceMotion} />
       <Navbar />
 
       <section className="relative z-10 mx-auto max-w-7xl px-5 pb-20 pt-32 max-lg:pb-10 max-lg:pt-24 sm:px-8 lg:pt-36">
@@ -280,13 +339,13 @@ export default function ArchitecturePage() {
           {integrationGroups.map((group, index) => {
             const Icon = group.icon;
             return (
-              <motion.article key={group.title} {...fadeUp(index * 0.06)} className="rounded-2xl border border-white/10 bg-[#08101d]/86 p-5 shadow-[0_0_48px_rgba(255,142,62,0.05)] transition hover:border-cyan-100/24 hover:bg-white/[0.045] max-lg:p-4">
+              <motion.article key={group.title} {...fadeUp(index * 0.06)} whileHover={reduceMotion ? undefined : { y: -3 }} className="integration-shimmer rounded-2xl border border-white/10 bg-[#08101d]/86 p-5 shadow-[0_0_48px_rgba(255,142,62,0.05)] transition hover:border-cyan-100/28 hover:bg-white/[0.045] hover:shadow-[0_0_42px_rgba(34,211,238,0.09)] max-lg:p-4">
                 <Icon className="size-7 text-cyan-100 max-lg:size-6" />
                 <h3 className="mt-4 text-xl font-semibold text-white max-lg:mt-3 max-lg:text-lg">{group.title}</h3>
                 <div className="mt-5 grid gap-3 max-lg:mt-3 max-lg:gap-2">
                   {group.items.map(([name, status]) => (
-                    <div key={name} className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2 max-lg:gap-2 max-lg:px-2.5 max-lg:py-2">
-                      <span className="text-sm font-medium text-slate-100">{name}</span>
+                    <div key={name} className="group flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/22 hover:bg-cyan-200/[0.045] max-lg:gap-2 max-lg:px-2.5 max-lg:py-2">
+                      <span className="text-sm font-medium text-slate-100 transition group-hover:text-white">{name}</span>
                       {status ? <span className="rounded-full border border-orange-200/20 bg-orange-200/[0.08] px-2 py-0.5 text-xs text-orange-100">{status}</span> : null}
                     </div>
                   ))}
@@ -569,7 +628,7 @@ function DataSourceColumn() {
             key={source.title}
             {...fadeUp(index * 0.06)}
             whileHover={{ y: -3 }}
-            className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-cyan-100/28 hover:bg-white/[0.06] hover:shadow-[0_0_34px_rgba(34,211,238,0.12)]"
+            className="integration-shimmer rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-cyan-100/28 hover:bg-white/[0.06] hover:shadow-[0_0_34px_rgba(34,211,238,0.12)]"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -580,7 +639,7 @@ function DataSourceColumn() {
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {source.badges.map((badge) => (
-                <span key={badge.name} className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-xs font-semibold ${badge.classes}`}>
+                <span key={badge.name} className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition hover:brightness-125 ${badge.classes}`}>
                   <span className="grid size-5 place-items-center rounded-full bg-white/10 text-[10px]">{badge.mark}</span>
                   {badge.name}
                 </span>
