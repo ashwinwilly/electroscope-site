@@ -31,11 +31,10 @@ const outputSignals = ["Risks", "Insights", "Next Moves", "Forecast Signals"];
 
 function enhanceMobileNav() {
   document.querySelectorAll("header").forEach((header) => {
-    if (header.querySelector(".mobile-menu-toggle, button[aria-label='Open navigation menu'], button[aria-label='Close navigation menu']")) return;
+    if (header.querySelector(".mobile-menu-toggle")) return;
     const nav = header.querySelector("nav");
-    if (!nav) return;
     const cta = [...nav.querySelectorAll("a")].find((link) => link.textContent.trim().includes("Book intro call"));
-    if (!cta) return;
+    if (!nav || !cta) return;
 
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -122,18 +121,17 @@ function compactPipeline() {
   original.insertAdjacentHTML("beforebegin", `
     <div class="mobile-pipeline-flow">
       <section>
-        <header><span>Capture</span><i class="cyan"></i></header>
+        <header><span>Inputs</span><i class="cyan"></i></header>
         <div>${inputSignals.map((item) => chip(item, "cyan")).join("")}</div>
       </section>
       <div class="mobile-pipeline-connector"><i></i></div>
       <section class="mobile-pipeline-core">
-        <span style="display:block;margin-top:0.25rem;color:rgb(207,250,254);font-size:0.75rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;">Reason</span>
         <b>Electroscope</b>
         <p>Agentic reasoning layer that keeps deal state alive.</p>
       </section>
       <div class="mobile-pipeline-connector orange"><i></i></div>
       <section>
-        <header><span>Act</span><i class="orange"></i></header>
+        <header><span>Outputs</span><i class="orange"></i></header>
         <div>${outputSignals.map((item) => chip(item, "orange")).join("")}</div>
       </section>
     </div>

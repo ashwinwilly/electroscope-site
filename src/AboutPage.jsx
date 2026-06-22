@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ExternalLink, Mail, Radar, Send } from "lucide-react";
+import { ArrowRight, ExternalLink, Mail, Menu, Radar, Send, X } from "lucide-react";
 
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Product", href: "/#product" },
   { label: "Architecture", href: "/architecture" },
-  { label: "Use Cases", href: "/#use-cases" },
+  { label: "Use Cases", href: "/use-cases" },
   { label: "About", href: "/about" },
   { label: "Contact Us", href: "/about#contact" },
 ];
@@ -77,14 +77,16 @@ function SignalBackground({ reduceMotion }) {
 }
 
 function AboutNavbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#05070d]/74 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label="Electroscope home">
-          <span className="grid size-9 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
+          <span className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
             <Radar className="size-5 text-cyan-200" />
           </span>
-          <span className="text-base font-semibold tracking-wide text-white">Electroscope</span>
+          <span className="text-sm font-semibold tracking-wide text-white min-[390px]:text-base">Electroscope</span>
         </Link>
         <div className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
           {navItems.map((item) => (
@@ -93,14 +95,41 @@ function AboutNavbar() {
             </Link>
           ))}
         </div>
-        <Link
-          to="/about#contact"
-          className="group inline-flex h-10 items-center gap-2 rounded-md border border-orange-300/35 bg-orange-300/10 px-4 text-sm font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16"
-        >
-          Book intro call
-          <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/about#contact"
+            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 sm:px-4 sm:text-sm"
+          >
+            Book intro call
+            <ArrowRight className="hidden size-4 transition group-hover:translate-x-0.5 sm:block" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center rounded-md border border-white/10 bg-white/[0.035] text-slate-100 transition hover:border-cyan-100/28 hover:text-cyan-100 md:hidden"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </nav>
+      {menuOpen ? (
+        <div className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+          <div className="mx-auto grid max-w-7xl gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.045] hover:text-cyan-100"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
