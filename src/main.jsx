@@ -16,6 +16,7 @@ import {
   FileText,
   Headphones,
   Inbox,
+  Menu,
   MessagesSquare,
   Network,
   Pause,
@@ -23,21 +24,24 @@ import {
   Quote,
   Radar,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   UserPlus,
   Waypoints,
   Workflow,
+  X,
 } from "lucide-react";
 import AboutPage from "./AboutPage.jsx";
 import ArchitecturePage from "./ArchitecturePage.jsx";
+import UseCasesPage from "./UseCasesPage.jsx";
 import "./styles.css";
 
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Product", href: "/#product" },
   { label: "Architecture", href: "/architecture" },
-  { label: "Use Cases", href: "/#use-cases" },
+  { label: "Use Cases", href: "/use-cases" },
   { label: "About", href: "/about" },
   { label: "Contact Us", href: "/about#contact" },
 ];
@@ -46,22 +50,73 @@ const useCases = [
   {
     title: "Account Executives",
     icon: BriefcaseBusiness,
-    text: "Walk into every interaction with current deal truth, open risks, stakeholder shifts, and the best next action.",
+    text: "Know what changed, what risk is rising, and which stakeholder needs the next touch.",
   },
   {
     title: "Sales Engineers",
     icon: Blocks,
-    text: "See technical blockers, proof points, security asks, and mutual action plan gaps without hunting through threads.",
+    text: "Carry technical context, success criteria, blockers, and materials into validation calls.",
   },
   {
-    title: "RevOps",
+    title: "RevOps & Forecasting",
     icon: DatabaseZap,
-    text: "Replace brittle CRM hygiene with source-backed updates, forecast signals, and consistent opportunity narratives.",
+    text: "See why confidence shifted without waiting on manual CRM hygiene.",
   },
   {
     title: "Customer Success",
     icon: Headphones,
-    text: "Carry forward every promise, risk, champion, and implementation cue as deals move from close to expansion.",
+    text: "Preserve promises, risks, and stakeholder context as the account moves post-sale.",
+  },
+];
+
+const integrationBadges = [
+  ["CRM", "CRM"],
+  ["Calls", "CALL"],
+  ["Inbox", "IN"],
+  ["Documents", "DOC"],
+  ["Calendar", "CAL"],
+  ["Slack", "SL"],
+  ["Salesforce", "SF"],
+  ["HubSpot", "HS"],
+  ["Gong", "G"],
+  ["Zoom", "Z"],
+  ["Google Workspace", "GW"],
+  ["Microsoft 365", "M365"],
+];
+
+const howItWorks = [
+  {
+    title: "Connect",
+    icon: Network,
+    text: "Bring together calls, inbox, CRM, documents, and calendar activity.",
+  },
+  {
+    title: "Understand",
+    icon: CircleDotDashed,
+    text: "Extract stakeholders, risks, blockers, commitments, and changes over time.",
+  },
+  {
+    title: "Activate",
+    icon: Workflow,
+    text: "Surface meeting prep, next moves, forecast signals, and living account context.",
+  },
+];
+
+const trustCards = [
+  {
+    title: "Works with existing systems",
+    icon: Network,
+    text: "Electroscope enriches the tools teams already use instead of replacing them.",
+  },
+  {
+    title: "Source-backed insights",
+    icon: FileText,
+    text: "Recommendations should trace back to calls, documents, CRM changes, or account activity.",
+  },
+  {
+    title: "Enterprise-ready permissions",
+    icon: ShieldCheck,
+    text: "Deal intelligence should respect team, account, and workflow boundaries.",
   },
 ];
 
@@ -236,6 +291,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/architecture" element={<ArchitecturePage />} />
+        <Route path="/use-cases" element={<UseCasesPage />} />
       </Routes>
     </>
   );
@@ -249,11 +305,14 @@ function HomePage() {
       <SignalBackground reduceMotion={reduceMotion} />
       <Navbar />
       <Hero reduceMotion={reduceMotion} />
+      <EnterpriseStrip />
+      <HowItWorks reduceMotion={reduceMotion} />
       <Problem reduceMotion={reduceMotion} />
       <Solution reduceMotion={reduceMotion} />
       <ProductDemo reduceMotion={reduceMotion} />
       <UseCases />
       <Architecture />
+      <SecurityTrust />
       <Testimonials />
       <FinalCta />
       <Footer />
@@ -262,14 +321,16 @@ function HomePage() {
 }
 
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#05070d]/74 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label="Electroscope home">
-          <span className="grid size-9 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
+          <span className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10 shadow-[0_0_30px_rgba(36,221,255,0.18)]">
             <Radar className="size-5 text-cyan-200" />
           </span>
-          <span className="text-base font-semibold tracking-wide text-white">Electroscope</span>
+          <span className="text-sm font-semibold tracking-wide text-white min-[390px]:text-base">Electroscope</span>
         </Link>
         <div className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
           {navItems.map((item) => (
@@ -278,20 +339,47 @@ function Navbar() {
             </Link>
           ))}
         </div>
-        <Link
-          to="/about#contact"
-          className="group inline-flex h-10 items-center gap-2 rounded-md border border-orange-300/35 bg-orange-300/10 px-4 text-sm font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16"
-        >
-          Book intro call
-          <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/about#contact"
+            className="group inline-flex h-10 items-center gap-1.5 rounded-md border border-orange-300/35 bg-orange-300/10 px-2.5 text-xs font-medium text-orange-100 shadow-[0_0_28px_rgba(255,144,69,0.14)] transition hover:border-orange-200/70 hover:bg-orange-300/16 sm:px-4 sm:text-sm"
+          >
+            Book intro call
+            <ArrowRight className="hidden size-4 transition group-hover:translate-x-0.5 sm:block" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center rounded-md border border-white/10 bg-white/[0.035] text-slate-100 transition hover:border-cyan-100/28 hover:text-cyan-100 md:hidden"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </nav>
+      {menuOpen ? (
+        <div className="border-t border-white/8 bg-[#05070d]/96 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl md:hidden">
+          <div className="mx-auto grid max-w-7xl gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-white/[0.045] hover:text-cyan-100"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
 
 function SignalBackground({ reduceMotion }) {
-  const dots = Array.from({ length: 34 }, (_, index) => ({
+  const dots = Array.from({ length: 24 }, (_, index) => ({
     id: index,
     left: `${(index * 23) % 100}%`,
     top: `${(index * 37) % 100}%`,
@@ -441,6 +529,73 @@ function SignalRow({ label, highlight, tone, value, index = 0, reduceMotion = fa
   );
 }
 
+function EnterpriseStrip() {
+  return (
+    <section className="relative z-10 border-y border-white/8 bg-[#07101a]/54 px-5 py-10 sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.46fr_1fr] lg:items-center">
+        <motion.div {...fadeUp()} className="max-w-xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Built for enterprise revenue teams</p>
+          <p className="mt-3 text-base leading-7 text-slate-300">Electroscope works across the systems where deal context already lives.</p>
+        </motion.div>
+        <motion.div {...fadeUp(0.08)} className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+          {integrationBadges.map(([name, mark], index) => (
+            <motion.div
+              key={name}
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2 }}
+              className="group flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/24 hover:bg-white/[0.055]"
+            >
+              <span className="grid size-8 shrink-0 place-items-center rounded-md border border-cyan-200/16 bg-cyan-200/[0.06] text-[0.66rem] font-bold text-cyan-100 group-hover:border-cyan-100/30">
+                {mark}
+              </span>
+              <span className="text-sm font-medium text-slate-200">{name}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks({ reduceMotion }) {
+  return (
+    <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8">
+      <motion.div {...fadeUp()} className="mb-10 max-w-4xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">How it works</p>
+        <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">From scattered context to source-backed deal intelligence.</h2>
+      </motion.div>
+      <div className="relative grid gap-4 lg:grid-cols-3">
+        <motion.div
+          className="pointer-events-none absolute left-[16%] right-[16%] top-14 hidden h-px origin-left bg-gradient-to-r from-cyan-200/20 via-cyan-200/70 to-orange-200/45 shadow-[0_0_18px_rgba(34,211,238,0.5)] lg:block"
+          initial={reduceMotion ? false : { scaleX: 0, opacity: 0 }}
+          whileInView={{ scaleX: 1, opacity: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        />
+        {howItWorks.map((step, index) => {
+          const Icon = step.icon;
+          return (
+            <motion.article
+              key={step.title}
+              {...fadeUp(index * 0.08)}
+              className="relative rounded-2xl border border-white/10 bg-[#08101d]/82 p-6 shadow-[0_0_44px_rgba(34,211,238,0.055)]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="grid size-11 place-items-center rounded-md border border-cyan-200/18 bg-cyan-200/[0.07] text-cyan-100">
+                  <Icon className="size-5" />
+                </span>
+                <span className="text-sm text-slate-500">0{index + 1}</span>
+              </div>
+              <h3 className="mt-6 text-2xl font-semibold text-white">{step.title}</h3>
+              <p className="mt-4 leading-7 text-slate-300">{step.text}</p>
+            </motion.article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function Problem({ reduceMotion }) {
   return (
     <section className="relative z-10 border-y border-white/8 bg-black/12 pt-24">
@@ -539,32 +694,103 @@ function DealSignalGraph({ reduceMotion }) {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto mt-9 grid max-w-2xl gap-4 md:hidden">
-        {graphNodes.map((node, index) => (
-          <motion.article
-            key={node.label}
-            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: index * 0.035, ease: [0.22, 1, 0.36, 1] }}
-            className={`relative border-l pl-5 ${node.type === "crm" ? "border-orange-200/40" : "border-cyan-200/40"}`}
-          >
-            <span className={`absolute -left-[7px] top-1 size-3 rounded-full ${node.type === "crm" ? "bg-orange-200 shadow-[0_0_18px_rgba(255,142,62,0.9)]" : "bg-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.9)]"}`} />
-            <div className={`rounded-xl border p-4 backdrop-blur-sm ${node.type === "crm" ? "border-orange-200/16 bg-orange-200/[0.045]" : "border-cyan-200/16 bg-cyan-200/[0.045]"}`}>
-              <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${node.type === "crm" ? "text-orange-100" : "text-cyan-100"}`}>
-                {node.type === "crm" ? "Visible CRM path" : "Hidden signal"}
-              </p>
-              <h4 className="mt-2 font-semibold text-white">{node.label}</h4>
-              <p className="mt-3 text-sm leading-6 text-slate-300">{node.text}</p>
-            </div>
-          </motion.article>
-          ))}
-      </div>
+      <MobileSignalTimeline reduceMotion={reduceMotion} />
 
       <p className="relative z-10 mx-auto mt-8 max-w-3xl text-center text-base leading-7 text-slate-300">
         Your CRM only sees what someone remembers to enter. Electroscope sees the deal as it is forming.
       </p>
     </motion.div>
+  );
+}
+
+function MobileSignalTimeline({ reduceMotion }) {
+  const visibleNodes = orangePath.map((label) => graphNodes.find((node) => node.label === label)).filter(Boolean);
+  const hiddenNodes = graphNodes.filter((node) => node.type === "hidden");
+
+  return (
+    <div className="relative z-10 mx-auto mt-9 grid max-w-2xl gap-4 md:hidden">
+      <SignalTimelineGroup
+        title="Visible CRM path"
+        tone="orange"
+        nodes={visibleNodes}
+        reduceMotion={reduceMotion}
+      />
+      <SignalTimelineGroup
+        title="Hidden signals"
+        tone="cyan"
+        nodes={hiddenNodes}
+        reduceMotion={reduceMotion}
+      />
+    </div>
+  );
+}
+
+function SignalTimelineGroup({ title, tone, nodes, reduceMotion }) {
+  const isOrange = tone === "orange";
+  const firstNodes = nodes.slice(0, 4);
+  const restNodes = nodes.slice(4);
+  const dotClass = isOrange ? "bg-orange-200 shadow-[0_0_16px_rgba(255,142,62,0.85)]" : "bg-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.85)]";
+  const cardClass = isOrange ? "border-orange-200/16 bg-orange-200/[0.045]" : "border-cyan-200/16 bg-cyan-200/[0.045]";
+  const pillClass = isOrange ? "border-orange-200/24 bg-orange-200/[0.08] text-orange-100" : "border-cyan-200/24 bg-cyan-200/[0.08] text-cyan-100";
+
+  return (
+    <motion.section
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className={`rounded-2xl border p-3 backdrop-blur-sm ${cardClass}`}
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${pillClass}`}>
+          <span className={`size-2 rounded-full ${dotClass}`} />
+          {title}
+        </span>
+        <span className="text-xs text-slate-500">{nodes.length} signals</span>
+      </div>
+      <div className="grid gap-1.5">
+        {firstNodes.map((node, index) => (
+          <SignalTimelineCard key={node.label} node={node} index={index} reduceMotion={reduceMotion} tone={tone} />
+        ))}
+      </div>
+      {restNodes.length ? (
+        <details className="group mt-2 rounded-xl border border-white/8 bg-[#050b14]/48">
+          <summary className="cursor-pointer list-none px-3 py-2 text-sm font-medium text-slate-300 marker:hidden">
+            <span className="flex items-center justify-between gap-3">
+              More signals
+              <span className="text-xs text-slate-500 transition group-open:rotate-180">⌄</span>
+            </span>
+          </summary>
+          <div className="grid gap-1.5 px-3 pb-3">
+            {restNodes.map((node) => (
+              <div key={node.label} className="flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.025] px-3 py-2">
+                <span className={`size-1.5 rounded-full ${dotClass}`} />
+                <span className="text-sm font-medium text-white">{node.label}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+    </motion.section>
+  );
+}
+
+function SignalTimelineCard({ node, index, reduceMotion, tone }) {
+  const isOrange = tone === "orange";
+  return (
+    <motion.article
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.36, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+      className="flex gap-3 rounded-xl border border-white/8 bg-[#050b14]/58 px-3 py-2"
+    >
+      <span className={`mt-1.5 size-2 shrink-0 rounded-full ${isOrange ? "bg-orange-200 shadow-[0_0_14px_rgba(255,142,62,0.85)]" : "bg-cyan-200 shadow-[0_0_14px_rgba(34,211,238,0.85)]"}`} />
+      <div>
+        <h4 className="text-sm font-semibold text-white">{node.label}</h4>
+        <p className="mt-0.5 line-clamp-1 text-xs leading-4 text-slate-400">{node.text}</p>
+      </div>
+    </motion.article>
   );
 }
 
@@ -616,7 +842,8 @@ function Solution({ reduceMotion }) {
           Electroscope ingests the scattered work around a deal, reasons over the context, and surfaces the risks, insights, and next moves your team needs before the CRM catches up.
         </p>
       </motion.div>
-      <div className="relative grid items-center gap-5 lg:grid-cols-[1.08fr_0.34fr_0.82fr_0.34fr_1.08fr]">
+      <MobilePipelineFlow reduceMotion={reduceMotion} />
+      <div className="relative hidden items-center gap-5 lg:grid lg:grid-cols-[1.08fr_0.34fr_0.82fr_0.34fr_1.08fr]">
         <PipelineGroup items={inputSignals} reduceMotion={reduceMotion} />
         <PipelineLine reduceMotion={reduceMotion} delay={0.62} />
         <PipelineCore reduceMotion={reduceMotion} />
@@ -624,6 +851,69 @@ function Solution({ reduceMotion }) {
         <PipelineGroup items={outputSignals.map((label) => ({ label, icon: TrendingUp }))} accent="orange" reduceMotion={reduceMotion} delayBase={1.85} />
       </div>
     </section>
+  );
+}
+
+function MobilePipelineFlow({ reduceMotion }) {
+  return (
+    <div className="relative grid gap-4 lg:hidden">
+      <PipelineStage title="Capture" items={inputSignals} tone="cyan" reduceMotion={reduceMotion} />
+      <MobilePipelineConnector reduceMotion={reduceMotion} />
+      <PipelineCore reduceMotion={reduceMotion} compact />
+      <MobilePipelineConnector reduceMotion={reduceMotion} tone="orange" />
+      <PipelineStage title="Act" items={outputSignals.map((label) => ({ label, icon: TrendingUp }))} tone="orange" reduceMotion={reduceMotion} />
+    </div>
+  );
+}
+
+function PipelineStage({ title, items, tone = "cyan", reduceMotion }) {
+  const isOrange = tone === "orange";
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-2xl border border-white/10 bg-[#07101d]/76 p-3"
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isOrange ? "text-orange-100" : "text-cyan-100"}`}>{title}</p>
+        <span className={`size-2 rounded-full ${isOrange ? "bg-orange-200 shadow-[0_0_14px_rgba(255,142,62,0.85)]" : "bg-cyan-200 shadow-[0_0_14px_rgba(34,211,238,0.85)]"}`} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className={`flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 ${isOrange ? "border-orange-200/14 bg-orange-200/[0.045]" : "border-cyan-200/14 bg-cyan-200/[0.045]"}`}>
+              <Icon className={`size-4 shrink-0 ${isOrange ? "text-orange-100" : "text-cyan-100"}`} />
+              <span className="text-sm font-medium text-white">{item.label}</span>
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+function MobilePipelineConnector({ reduceMotion, tone = "cyan" }) {
+  const isOrange = tone === "orange";
+
+  return (
+    <div className="relative grid h-9 place-items-center">
+      <motion.div
+        className={`h-full w-px origin-top ${isOrange ? "bg-gradient-to-b from-orange-200/10 via-orange-200/80 to-cyan-200/16 shadow-[0_0_16px_rgba(255,142,62,0.55)]" : "bg-gradient-to-b from-cyan-200/10 via-cyan-200/80 to-orange-200/16 shadow-[0_0_16px_rgba(34,211,238,0.6)]"}`}
+        initial={reduceMotion ? false : { scaleY: 0, opacity: 0 }}
+        whileInView={{ scaleY: 1, opacity: 1 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <motion.span
+        className={`absolute top-1 size-1.5 rounded-full ${isOrange ? "bg-orange-200 shadow-[0_0_14px_rgba(255,142,62,0.9)]" : "bg-cyan-200 shadow-[0_0_14px_rgba(34,211,238,0.9)]"}`}
+        animate={reduceMotion ? undefined : { y: [0, 24, 0], opacity: [0, 1, 0] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
   );
 }
 
@@ -653,15 +943,15 @@ function PipelineGroup({ items, accent = "cyan", reduceMotion = false, delayBase
   );
 }
 
-function PipelineCore({ reduceMotion }) {
+function PipelineCore({ reduceMotion, compact = false }) {
   return (
-    <div className="relative rounded-2xl border border-cyan-200/22 bg-[#09111f]/88 p-6 text-center shadow-[0_0_70px_rgba(34,211,238,0.13)] backdrop-blur-xl">
+    <div className={`relative rounded-2xl border border-cyan-200/22 bg-[#09111f]/88 text-center shadow-[0_0_70px_rgba(34,211,238,0.13)] backdrop-blur-xl ${compact ? "p-4" : "p-6"}`}>
       <motion.div
         className="absolute -inset-8 -z-10 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.28),transparent_44%),radial-gradient(circle_at_68%_62%,rgba(255,142,62,0.18),transparent_36%)] blur-2xl"
         animate={reduceMotion ? undefined : { opacity: [0.45, 0.9, 0.5], scale: [0.96, 1.05, 0.98] }}
         transition={{ duration: 4.8, delay: 1.15, repeat: Infinity, ease: "easeInOut" }}
       />
-      <div className="relative mx-auto grid size-16 place-items-center rounded-full border border-cyan-100/24 bg-cyan-200/[0.08] shadow-[0_0_46px_rgba(34,211,238,0.18)]">
+      <div className={`relative mx-auto grid place-items-center rounded-full border border-cyan-100/24 bg-cyan-200/[0.08] shadow-[0_0_46px_rgba(34,211,238,0.18)] ${compact ? "size-14" : "size-16"}`}>
         <motion.span
           className="absolute inset-2 rounded-full border border-orange-100/16"
           animate={reduceMotion ? undefined : { rotate: 360 }}
@@ -669,8 +959,9 @@ function PipelineCore({ reduceMotion }) {
         />
         <Cpu className="size-7 text-cyan-100" />
       </div>
-      <h3 className="mt-5 text-2xl font-semibold text-white">Electroscope</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-300">Agentic reasoning layer that keeps deal state alive.</p>
+      {compact ? <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">Reason</p> : null}
+      <h3 className={`${compact ? "mt-2 text-xl" : "mt-5 text-2xl"} font-semibold text-white`}>Electroscope</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-300">Agentic reasoning layer that keeps deal state alive.</p>
     </div>
   );
 }
@@ -746,7 +1037,7 @@ function ProductDemo({ reduceMotion }) {
                     key={tab.title}
                     type="button"
                     onClick={() => setActive(index)}
-                    className={`min-w-[220px] rounded-xl border p-3 text-left transition duration-200 lg:min-w-0 ${
+                    className={`min-w-[188px] rounded-xl border p-3 text-left transition duration-200 sm:min-w-[220px] lg:min-w-0 ${
                       selected
                         ? "border-cyan-100/45 bg-cyan-200/[0.085] shadow-[0_0_46px_rgba(34,211,238,0.2)]"
                         : "border-white/8 bg-[#060b14]/82 hover:border-white/16 hover:bg-white/[0.035]"
@@ -758,7 +1049,7 @@ function ProductDemo({ reduceMotion }) {
                       </span>
                       <span className="font-semibold text-white">{tab.title}</span>
                     </div>
-                    <p className="mt-2 text-sm leading-5 text-slate-400">{tab.description}</p>
+                    <p className="mt-2 hidden text-sm leading-5 text-slate-400 sm:block lg:block">{tab.description}</p>
                   </button>
                 );
               })}
@@ -775,6 +1066,13 @@ function ProductDemo({ reduceMotion }) {
                   <h3 className="mt-1 text-xl font-semibold text-white">{activeTab.title}</h3>
                 </div>
                 <span className="rounded-full border border-cyan-200/20 bg-cyan-200/[0.08] px-3 py-1 text-xs font-medium text-cyan-100">Live context</span>
+              </div>
+              <div className="relative mb-4 flex flex-wrap gap-2">
+                <MetaPill label="Source" value="Feb 19 technical deep-dive" />
+                <MetaPill label="Updated" value="12 min ago" tone="cyan" />
+                <MetaPill label="Confidence" value="Medium" tone="blue" />
+                <MetaPill label="Forecast impact" value="+18% risk" tone="orange" />
+                <MetaPill label="CRM" value="Linked to opportunity" tone="green" />
               </div>
 
               <AnimatePresence mode="wait">
@@ -820,6 +1118,23 @@ function ProductDemo({ reduceMotion }) {
         </motion.div>
       </div>
     </section>
+  );
+}
+
+function MetaPill({ label, value, tone = "slate" }) {
+  const palette = {
+    slate: "border-white/10 bg-white/[0.035] text-slate-300",
+    cyan: "border-cyan-200/18 bg-cyan-200/[0.055] text-cyan-100",
+    blue: "border-blue-300/18 bg-blue-300/[0.055] text-blue-100",
+    orange: "border-orange-200/18 bg-orange-200/[0.06] text-orange-100",
+    green: "border-emerald-300/18 bg-emerald-300/[0.055] text-emerald-100",
+  };
+
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-[0.7rem] font-medium ${palette[tone]}`}>
+      <span className="text-slate-500">{label}: </span>
+      {value}
+    </span>
   );
 }
 
@@ -1051,7 +1366,7 @@ function UseCases() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <motion.div {...fadeUp()} className="mb-12 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-200">Use cases</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">Every revenue team sees the same living context.</h2>
+          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">Built for every team moving the deal forward.</h2>
         </motion.div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {useCases.map((card, index) => {
@@ -1061,6 +1376,10 @@ function UseCases() {
                 <Icon className="size-7 text-cyan-100" />
                 <h3 className="mt-5 text-xl font-semibold text-white">{card.title}</h3>
                 <p className="mt-4 text-sm leading-7 text-slate-300">{card.text}</p>
+                <Link to="/use-cases" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-100 transition hover:text-cyan-50">
+                  View use cases
+                  <ArrowRight className="size-4" />
+                </Link>
               </motion.article>
             );
           })}
@@ -1107,6 +1426,35 @@ function Architecture() {
   );
 }
 
+function SecurityTrust() {
+  return (
+    <section id="trust" className="relative z-10 scroll-mt-28 border-y border-white/8 bg-[#070d17]/72 px-5 py-20 sm:px-8">
+      <div className="mx-auto max-w-7xl">
+        <motion.div {...fadeUp()} className="mb-10 max-w-4xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-200">Trust</p>
+          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">Built for sensitive revenue workflows.</h2>
+        </motion.div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {trustCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <motion.article
+                key={card.title}
+                {...fadeUp(index * 0.08)}
+                className="rounded-2xl border border-white/10 bg-[#08101d]/82 p-6 shadow-[0_0_40px_rgba(34,211,238,0.045)]"
+              >
+                <Icon className="size-7 text-cyan-100" />
+                <h3 className="mt-5 text-xl font-semibold text-white">{card.title}</h3>
+                <p className="mt-4 leading-7 text-slate-300">{card.text}</p>
+              </motion.article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Testimonials() {
   const reduceMotion = useReducedMotion();
 
@@ -1120,8 +1468,8 @@ function Testimonials() {
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-5xl">What revenue teams are saying</h2>
         </motion.div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {testimonials.map((testimonial, index) => (
+        <div className="grid gap-4 lg:grid-cols-3">
+          {testimonials.slice(0, 3).map((testimonial, index) => (
             <motion.article
               key={testimonial.name}
               {...fadeUp(index * 0.06)}
@@ -1173,14 +1521,63 @@ function FinalCta() {
 }
 
 function Footer() {
+  const columns = [
+    {
+      title: "Product",
+      links: [
+        ["Product", "/#product"],
+        ["Use Cases", "/use-cases"],
+        ["Architecture", "/architecture"],
+        ["Integrations", "/architecture"],
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        ["About", "/about"],
+        ["Contact", "/about#contact"],
+        ["LinkedIn", "https://www.linkedin.com/company/electroscope-ai"],
+      ],
+    },
+    {
+      title: "Trust",
+      links: [
+        ["Security", "#trust"],
+        ["Privacy", "#privacy"],
+        ["Terms", "#terms"],
+      ],
+    },
+  ];
+
   return (
-    <footer className="relative z-10 border-t border-white/8 px-5 py-10 sm:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 text-white">
-          <Radar className="size-5 text-cyan-100" />
-          <span className="font-semibold">Electroscope</span>
+    <footer className="relative z-10 border-t border-white/8 bg-[#05070d] px-5 py-12 sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_1.4fr]">
+        <div>
+          <div className="flex items-center gap-3 text-white">
+            <span className="grid size-9 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10">
+              <Radar className="size-5 text-cyan-100" />
+            </span>
+            <span className="font-semibold">Electroscope</span>
+          </div>
+          <p className="mt-4 max-w-md text-sm leading-7 text-slate-400">
+            Agentic sales intelligence for enterprise revenue teams that need living deal context without manual CRM work.
+          </p>
+          <p className="mt-6 text-xs text-slate-600">© 2026 Electroscope. All rights reserved.</p>
         </div>
-        <p>Agentic sales intelligence for enterprise revenue teams.</p>
+        <div className="grid gap-8 sm:grid-cols-3">
+          {columns.map((column) => (
+            <div key={column.title}>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">{column.title}</h3>
+              <div className="mt-4 grid gap-3">
+                {column.links.map(([label, href]) => (
+                  <a key={label} href={href} className="text-sm text-slate-500 transition hover:text-cyan-100">
+                    {label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </footer>
   );
