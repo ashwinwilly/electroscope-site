@@ -21,7 +21,83 @@ body {
   background: #05070d;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  sans-serif;
+}
+
+.cursor-glow {
+  pointer-events: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 440px;
+  height: 440px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.085), rgba(34, 211, 238, 0.028) 34%, transparent 68%);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+  will-change: transform;
+}
+
+.section-glow-separator::before,
+.section-glow-separator::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  z-index: 0;
+  width: min(78rem, calc(100vw - 2rem));
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.28), rgba(255, 184, 107, 0.16), transparent);
+  box-shadow: 0 0 28px rgba(34, 211, 238, 0.11);
+}
+
+.section-glow-separator::before {
+  top: 0;
+}
+
+.section-glow-separator::after {
+  bottom: 0;
+  opacity: 0.6;
+}
+
+.integration-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.integration-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-115%);
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.08), transparent 72%);
+  opacity: 0;
+  transition:
+    transform 0.72s ease,
+    opacity 0.24s ease;
+}
+
+.integration-shimmer:hover::after,
+.integration-shimmer:focus-within::after {
+  transform: translateX(115%);
+  opacity: 1;
+}
+
+.risk-pulse-once {
+  animation: risk-pulse-once 1.35s ease-out 0.22s 1 both;
+}
+
+@keyframes risk-pulse-once {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(248, 113, 113, 0);
+  }
+
+  45% {
+    box-shadow: 0 0 34px rgba(248, 113, 113, 0.16);
+  }
 }
 
 ::selection {
@@ -50,6 +126,10 @@ body {
 }
 
 @media (max-width: 767px) {
+  .cursor-glow {
+    display: none;
+  }
+
   header nav {
     gap: 0.5rem;
     padding-left: 1rem;
@@ -278,6 +358,21 @@ body {
   }
 
   .mobile-output-tab p {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .cursor-glow {
     display: none;
   }
 }
