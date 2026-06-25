@@ -13,6 +13,7 @@ import {
   Workflow,
   X,
 } from "lucide-react";
+import SiteFooter from "./SiteFooter.jsx";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -282,20 +283,6 @@ function PersonaCard({ persona, index, reduceMotion }) {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="relative z-10 border-t border-white/8 bg-[#05070d] px-5 py-12 sm:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 text-white">
-          <Radar className="size-5 text-cyan-100" />
-          <span className="font-semibold">Electroscope</span>
-        </div>
-        <p>Agentic sales intelligence for enterprise revenue teams.</p>
-      </div>
-    </footer>
-  );
-}
-
 export default function UseCasesPage() {
   const reduceMotion = useReducedMotion();
 
@@ -364,7 +351,7 @@ export default function UseCasesPage() {
         </motion.div>
       </section>
 
-      <Footer />
+      <SiteFooter />
     </main>
   );
 }

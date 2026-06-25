@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import BrandLogo from "./BrandLogo.jsx";
+import SiteFooter from "./SiteFooter.jsx";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -271,20 +272,6 @@ function Navbar() {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="relative z-10 border-t border-white/8 px-5 py-10 sm:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 text-white">
-          <Radar className="size-5 text-cyan-100" />
-          <span className="font-semibold">Electroscope</span>
-        </div>
-        <p>Agentic sales intelligence for enterprise revenue teams.</p>
-      </div>
-    </footer>
-  );
-}
-
 export default function ArchitecturePage() {
   const reduceMotion = useReducedMotion();
 
@@ -328,7 +315,7 @@ export default function ArchitecturePage() {
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 py-20 max-lg:py-12 sm:px-8">
+      <section id="integrations" className="relative z-10 mx-auto max-w-7xl scroll-mt-28 px-5 py-20 max-lg:py-12 sm:px-8">
         <motion.div {...fadeUp()} className="mb-10 max-w-4xl max-lg:mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-200">Integrations</p>
           <h2 className="mt-4 text-3xl font-semibold text-white max-lg:text-2xl sm:text-5xl md:max-lg:text-4xl">Connect the systems your revenue team already uses.</h2>
@@ -418,7 +405,7 @@ export default function ArchitecturePage() {
         </motion.div>
       </section>
 
-      <Footer />
+      <SiteFooter />
     </main>
   );
 }

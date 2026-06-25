@@ -35,6 +35,8 @@ import {
 import AboutPage from "./AboutPage.jsx";
 import ArchitecturePage from "./ArchitecturePage.jsx";
 import BrandLogo from "./BrandLogo.jsx";
+import SiteFooter from "./SiteFooter.jsx";
+import TrustPage from "./TrustPage.jsx";
 import UseCasesPage from "./UseCasesPage.jsx";
 import "./styles.css";
 
@@ -315,6 +317,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/architecture" element={<ArchitecturePage />} />
         <Route path="/use-cases" element={<UseCasesPage />} />
+        <Route path="/trust" element={<TrustPage />} />
       </Routes>
     </>
   );
@@ -339,7 +342,7 @@ function HomePage() {
       <SecurityTrust />
       <Testimonials />
       <FinalCta />
-      <Footer />
+      <SiteFooter />
     </main>
   );
 }
@@ -1594,6 +1597,12 @@ function SecurityTrust() {
             );
           })}
         </div>
+        <motion.div {...fadeUp(0.18)} className="mt-8">
+          <Link to="/trust" className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-cyan-200/22 bg-cyan-200/[0.07] px-5 text-sm font-semibold text-cyan-100 transition hover:border-cyan-100/40 hover:bg-cyan-200/[0.11]">
+            Explore trust &amp; security
+            <ArrowRight className="size-4" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
@@ -1661,69 +1670,6 @@ function FinalCta() {
         </Link>
       </motion.div>
     </section>
-  );
-}
-
-function Footer() {
-  const columns = [
-    {
-      title: "Product",
-      links: [
-        ["Product", "/#product"],
-        ["Use Cases", "/use-cases"],
-        ["Architecture", "/architecture"],
-        ["Integrations", "/architecture"],
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        ["About", "/about"],
-        ["Contact", "/about#contact"],
-        ["LinkedIn", "https://www.linkedin.com/company/electroscope-ai"],
-      ],
-    },
-    {
-      title: "Trust",
-      links: [
-        ["Security", "#trust"],
-        ["Privacy", "#privacy"],
-        ["Terms", "#terms"],
-      ],
-    },
-  ];
-
-  return (
-    <footer className="relative z-10 border-t border-white/8 bg-[#05070d] px-5 py-12 sm:px-8">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_1.4fr]">
-        <div>
-          <div className="flex items-center gap-3 text-white">
-            <span className="grid size-9 place-items-center rounded-md border border-cyan-300/35 bg-cyan-300/10">
-              <Radar className="size-5 text-cyan-100" />
-            </span>
-            <span className="font-semibold">Electroscope</span>
-          </div>
-          <p className="mt-4 max-w-md text-sm leading-7 text-slate-400">
-            Agentic sales intelligence for enterprise revenue teams that need living deal context without manual CRM work.
-          </p>
-          <p className="mt-6 text-xs text-slate-600">© 2026 Electroscope. All rights reserved.</p>
-        </div>
-        <div className="grid gap-8 sm:grid-cols-3">
-          {columns.map((column) => (
-            <div key={column.title}>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">{column.title}</h3>
-              <div className="mt-4 grid gap-3">
-                {column.links.map(([label, href]) => (
-                  <a key={label} href={href} className="text-sm text-slate-500 transition hover:text-cyan-100">
-                    {label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </footer>
   );
 }
 
