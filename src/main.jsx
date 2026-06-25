@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import AboutPage from "./AboutPage.jsx";
 import ArchitecturePage from "./ArchitecturePage.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 import UseCasesPage from "./UseCasesPage.jsx";
 import "./styles.css";
 
@@ -69,20 +70,7 @@ const useCases = [
   },
 ];
 
-const integrationBadges = [
-  ["CRM", "CRM"],
-  ["Calls", "CALL"],
-  ["Inbox", "IN"],
-  ["Documents", "DOC"],
-  ["Calendar", "CAL"],
-  ["Slack", "SL"],
-  ["Salesforce", "SF"],
-  ["HubSpot", "HS"],
-  ["Gong", "G"],
-  ["Zoom", "Z"],
-  ["Google Workspace", "GW"],
-  ["Microsoft 365", "M365"],
-];
+const integrationBadges = ["CRM", "Calls", "Inbox", "Documents", "Calendar", "Slack", "Salesforce", "HubSpot", "Gong", "Zoom", "Google Workspace", "Microsoft 365"];
 
 const howItWorks = [
   {
@@ -604,15 +592,15 @@ function EnterpriseStrip() {
           <p className="mt-3 text-base leading-7 text-slate-300">Electroscope works across the systems where deal context already lives.</p>
         </motion.div>
         <motion.div {...fadeUp(0.08)} className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-          {integrationBadges.map(([name, mark], index) => (
+          {integrationBadges.map((name) => (
             <motion.div
               key={name}
               whileHover={reduceMotion ? undefined : { y: -2 }}
               transition={{ duration: 0.2 }}
               className="integration-shimmer group flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/28 hover:bg-white/[0.055] hover:shadow-[0_0_32px_rgba(34,211,238,0.1)]"
             >
-              <span className="grid size-8 shrink-0 place-items-center rounded-md border border-cyan-200/16 bg-cyan-200/[0.06] text-[0.66rem] font-bold text-cyan-100 transition group-hover:border-cyan-100/36 group-hover:text-white">
-                {mark}
+              <span className="grid size-8 shrink-0 place-items-center rounded-md border border-white/12 bg-white/[0.055] transition group-hover:border-cyan-100/36 group-hover:bg-white/[0.09] group-hover:brightness-125">
+                <BrandLogo name={name} compact />
               </span>
               <span className="text-sm font-medium text-slate-200 transition group-hover:text-white">{name}</span>
             </motion.div>

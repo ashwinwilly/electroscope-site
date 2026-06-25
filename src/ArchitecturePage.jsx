@@ -14,6 +14,7 @@ import {
   Workflow,
   X,
 } from "lucide-react";
+import BrandLogo from "./BrandLogo.jsx";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -345,7 +346,7 @@ export default function ArchitecturePage() {
                 <div className="mt-5 grid gap-3 max-lg:mt-3 max-lg:gap-2">
                   {group.items.map(([name, status]) => (
                     <div key={name} className="group flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2 transition hover:border-cyan-100/22 hover:bg-cyan-200/[0.045] max-lg:gap-2 max-lg:px-2.5 max-lg:py-2">
-                      <span className="text-sm font-medium text-slate-100 transition group-hover:text-white">{name}</span>
+                      <BrandLogo name={name} className="transition group-hover:brightness-125" />
                       {status ? <span className="rounded-full border border-orange-200/20 bg-orange-200/[0.08] px-2 py-0.5 text-xs text-orange-100">{status}</span> : null}
                     </div>
                   ))}
@@ -640,7 +641,7 @@ function DataSourceColumn() {
             <div className="mt-4 flex flex-wrap gap-2">
               {source.badges.map((badge) => (
                 <span key={badge.name} className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-xs font-semibold transition hover:brightness-125 ${badge.classes}`}>
-                  <span className="grid size-5 place-items-center rounded-full bg-white/10 text-[10px]">{badge.mark}</span>
+                  <BrandLogo name={badge.name} compact />
                   {badge.name}
                 </span>
               ))}
