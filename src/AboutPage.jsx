@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ExternalLink, Mail, Menu, Radar, Send, X } from "lucide-react";
+import SiteFooter from "./SiteFooter.jsx";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -340,15 +341,7 @@ export default function AboutPage() {
         </motion.div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/8 px-5 py-10 sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3 text-white">
-            <Radar className="size-5 text-cyan-100" />
-            <span className="font-semibold">Electroscope</span>
-          </div>
-          <p>Agentic sales intelligence for enterprise revenue teams.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
